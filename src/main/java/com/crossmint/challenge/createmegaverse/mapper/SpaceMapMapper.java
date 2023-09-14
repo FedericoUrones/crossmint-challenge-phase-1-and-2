@@ -1,7 +1,6 @@
 package com.crossmint.challenge.createmegaverse.mapper;
 
 import com.crossmint.challenge.createmegaverse.domain.entities.*;
-import com.crossmint.challenge.createmegaverse.entities.*;
 import com.crossmint.challenge.createmegaverse.infrastructure.entities.SpaceMapGoalResponse;
 import org.mapstruct.Mapper;
 

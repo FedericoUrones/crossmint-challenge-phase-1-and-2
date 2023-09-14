@@ -1,21 +1,24 @@
 package com.crossmint.challenge.createmegaverse.domain.usecase;
 
+import com.crossmint.challenge.createmegaverse.domain.entities.Polyanet;
 import com.crossmint.challenge.createmegaverse.domain.entities.XCreator;
 import com.crossmint.challenge.createmegaverse.domain.ports.api.CreateXCommand;
 import com.crossmint.challenge.createmegaverse.domain.ports.spi.CreateXPort;
-import com.crossmint.challenge.createmegaverse.infrastructure.ApiClient;
 import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Component
 @Data
 public class CreateX implements CreateXCommand {
+
+    Logger logger = LoggerFactory.getLogger(CreateX.class);
 
     private static final String SPACE = "SPACE";
     private static final String POLYANET = "POLYANET";
@@ -31,23 +34,25 @@ public class CreateX implements CreateXCommand {
 
     @Override
     public void execute(XCreator xCreator) {
-        int finalSize = xCreator == null || xCreator.getSize() == null? defaultSize : xCreator.getSize();
-        int finalMargin = xCreator == null || xCreator.getMargin() == null? defaultMargin : xCreator.getMargin();
-        int size = finalSize;
+        int size = xCreator == null || xCreator.getSize() == null? defaultSize : xCreator.getSize();
+        int margin = xCreator == null || xCreator.getMargin() == null? defaultMargin : xCreator.getMargin();
 
-        // fill matrix with SPACEs
-        String[][] result = new String[size][size];
-        for(int i = 0; i < size; i++) {
-            String[] stringsArray = new String[finalSize];
-            Arrays.fill(stringsArray, SPACE);
-            result[i] = stringsArray;
-        }
+        List<Polyanet> polyanets = new ArrayList<>();
 
         // put POLYANETs in matrix
-        for(int i = finalMargin; i < ??; i++) {
-            // TODO; ACA PONER LOS POLYANETS EN EL PRINCIPIO Y EN EL FIN
-            // algo asi: result[i][i] = POLYANET;
-
+        for(int i = margin; i < size -1 - margin; i++) {
+            int startPolyanet = i + margin;
+            int endPolyanet = size -1 - i - margin;
+            polyanets.add(new Polyanet(startPolyanet, startPolyanet));
+            polyanets.add(new Polyanet(endPolyanet, endPolyanet));
         }
+
+        try {
+            polyanets.forEach(polyanet -> createXPort.createX(polyanet));
+        } catch (Exception e) {
+            logger.error("Error happened while creating polyanets");
+            logger.error(e.getLocalizedMessage());
+        }
+        logger.info(polyanets.size() + " Polyanets created successfully!");
     }
 }

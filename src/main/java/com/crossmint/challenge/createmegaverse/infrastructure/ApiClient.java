@@ -2,6 +2,7 @@ package com.crossmint.challenge.createmegaverse.infrastructure;
 
 import com.crossmint.challenge.createmegaverse.domain.entities.Polyanet;
 import com.crossmint.challenge.createmegaverse.domain.entities.SpaceMap;
+import com.crossmint.challenge.createmegaverse.domain.ports.spi.CreateXPort;
 import com.crossmint.challenge.createmegaverse.infrastructure.entities.SpaceMapGoalResponse;
 import com.crossmint.challenge.createmegaverse.mapper.SpaceMapMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-public class ApiClient {
+public class ApiClient implements CreateXPort {
 
 
     @Autowired
@@ -60,5 +61,10 @@ public class ApiClient {
         bodyValues.add("candidateId", candidateId);
 
         return BodyInserters.fromFormData(bodyValues);
+    }
+
+    @Override
+    public void createX(Polyanet polyanet) {
+
     }
 }
