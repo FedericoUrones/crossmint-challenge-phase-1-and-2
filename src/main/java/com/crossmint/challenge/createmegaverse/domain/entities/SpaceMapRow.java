@@ -1,9 +1,8 @@
-package com.crossmint.challenge.createmegaverse.entities;
+package com.crossmint.challenge.createmegaverse.domain.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data

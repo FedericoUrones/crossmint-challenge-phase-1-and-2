@@ -1,4 +1,4 @@
-package com.crossmint.challenge.createmegaverse.entities.api;
+package com.crossmint.challenge.createmegaverse.infrastructure.entities;
 
 import lombok.Data;
 

@@ -1,8 +1,8 @@
-package com.crossmint.challenge.createmegaverse.apiClient;
+package com.crossmint.challenge.createmegaverse.infrastructure;
 
-import com.crossmint.challenge.createmegaverse.entities.Polyanet;
-import com.crossmint.challenge.createmegaverse.entities.SpaceMap;
-import com.crossmint.challenge.createmegaverse.entities.api.SpaceMapGoalResponse;
+import com.crossmint.challenge.createmegaverse.domain.entities.Polyanet;
+import com.crossmint.challenge.createmegaverse.domain.entities.SpaceMap;
+import com.crossmint.challenge.createmegaverse.infrastructure.entities.SpaceMapGoalResponse;
 import com.crossmint.challenge.createmegaverse.mapper.SpaceMapMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
