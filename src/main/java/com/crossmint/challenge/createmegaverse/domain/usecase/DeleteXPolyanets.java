@@ -16,17 +16,17 @@ import java.util.List;
 
 @Component
 @Data
-public class DeleteAllXPolyanets implements DeleteXPolyanetsCommand {
-    Logger logger = LoggerFactory.getLogger(DeleteAllXPolyanets.class);
+public class DeleteXPolyanets implements DeleteXPolyanetsCommand {
+    Logger logger = LoggerFactory.getLogger(DeleteXPolyanets.class);
 
     @Autowired
     private DeletePolyanetsPort deletePolyanetsPort;
 
     @Value("${size}")
-    private Integer defaultSize; // it must be odd and higher than ??
+    private Integer defaultSize;
 
     @Value("${margin}")
-    private Integer defaultMargin; // must be higher or equal to 0
+    private Integer defaultMargin;
 
     @Override
     public void execute(SizeAndMargin sizeAndMargin) throws Exception {
@@ -36,9 +36,8 @@ public class DeleteAllXPolyanets implements DeleteXPolyanetsCommand {
         List<Polyanet> polyanets = new ArrayList<>();
 
         // put POLYANETs in matrix
-        for(int i = margin; i < size -1 - margin; i++) {
-            int startPolyanet = i + margin;
-            int endPolyanet = size -1 - i - margin;
+        for(int startPolyanet = margin; startPolyanet <= size -1 - margin; startPolyanet++) {
+            int endPolyanet = size -1 - startPolyanet;
             polyanets.add(new Polyanet(startPolyanet, startPolyanet));
             polyanets.add(new Polyanet(startPolyanet, endPolyanet));
         }

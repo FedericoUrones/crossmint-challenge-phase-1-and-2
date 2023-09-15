@@ -4,8 +4,11 @@ import com.crossmint.challenge.createmegaverse.domain.entities.Polyanet;
 import com.crossmint.challenge.createmegaverse.domain.entities.SpaceMap;
 import com.crossmint.challenge.createmegaverse.domain.ports.spi.CreatePolyanetPort;
 import com.crossmint.challenge.createmegaverse.domain.ports.spi.DeletePolyanetsPort;
+import com.crossmint.challenge.createmegaverse.domain.usecase.CreateXPolyanets;
 import com.crossmint.challenge.createmegaverse.infrastructure.entities.SpaceMapGoalResponse;
 import com.crossmint.challenge.createmegaverse.mapper.SpaceMapMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -15,10 +18,15 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.util.retry.Retry;
+
+import java.time.Duration;
 
 @Service
 public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort {
 
+    Logger logger = LoggerFactory.getLogger(ApiClient.class);
     private final SpaceMapMapper spaceMapMapper;
 
     private final String baseUrl;
@@ -49,7 +57,9 @@ public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(getJsonBody(polyanet))
                 .retrieve()
-                .bodyToMono(Object.class).block();
+                .bodyToMono(Object.class)
+                .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(1))
+                        .filter(this::is429TooManyRequestsError)).block();
     }
 
     @Override
@@ -59,7 +69,9 @@ public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(getJsonBody(polyanet))
                 .retrieve()
-                .bodyToMono(Object.class).block();
+                .bodyToMono(Object.class)
+                .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(1))
+                        .filter(this::is429TooManyRequestsError)).block();
     }
 
     private BodyInserters.FormInserter<String> getJsonBody(Polyanet polyanet) {
@@ -69,6 +81,12 @@ public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort {
         bodyValues.add("candidateId", candidateId);
 
         return BodyInserters.fromFormData(bodyValues);
+    }
+
+    private boolean is429TooManyRequestsError(Throwable throwable) {
+        logger.error("Got 429 error, should be retried later");
+        return throwable instanceof WebClientResponseException &&
+                ((WebClientResponseException) throwable).getStatusCode().is4xxClientError();
     }
 
 }

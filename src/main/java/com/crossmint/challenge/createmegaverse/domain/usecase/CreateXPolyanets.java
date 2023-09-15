@@ -40,11 +40,12 @@ public class CreateXPolyanets implements CreateXCommand {
         List<Polyanet> polyanets = new ArrayList<>();
 
         // put POLYANETs in matrix
-        for(int i = margin; i < size -1 - margin; i++) {
-            int startPolyanet = i + margin;
-            int endPolyanet = size -1 - i - margin;
+        for(int startPolyanet = margin; startPolyanet <= size -1 - margin; startPolyanet++) {
+            int endPolyanet = size -1 - startPolyanet;
             polyanets.add(new Polyanet(startPolyanet, startPolyanet));
-            polyanets.add(new Polyanet(startPolyanet, endPolyanet));
+            if(startPolyanet != endPolyanet) {
+                polyanets.add(new Polyanet(startPolyanet, endPolyanet));
+            }
         }
 
         try {
