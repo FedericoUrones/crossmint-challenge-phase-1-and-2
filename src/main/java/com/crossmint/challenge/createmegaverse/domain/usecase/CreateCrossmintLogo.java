@@ -53,6 +53,6 @@ public class CreateCrossmintLogo implements CreateCrossmintLogoCommand {
         });
         logger.info(requiredSpaceMap.getComethList().size() + " Comeths created");
 
-        logger.info("Finished creating crossming logo");
+        logger.info("Finished creating Crossmint logo");
     }
 }

@@ -64,7 +64,7 @@ public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort, GetGo
                 .body(getJsonBody(spaceElement, true))
                 .retrieve()
                 .bodyToMono(Object.class)
-                .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(1))
+                .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))
                         .filter(this::is429TooManyRequestsError)).block();
     }
 
@@ -76,7 +76,7 @@ public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort, GetGo
                 .body(getJsonBody(spaceElement, false))
                 .retrieve()
                 .bodyToMono(Object.class)
-                .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(1))
+                .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))
                         .filter(this::is429TooManyRequestsError)).block();
     }
 
@@ -98,9 +98,9 @@ public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort, GetGo
 
         if (isCreation) {
             if (spaceElement instanceof Cometh) {
-                bodyValues.add("direction", ((Cometh) spaceElement).getDirection().toString());
+                bodyValues.add("direction", ((Cometh) spaceElement).getDirection().toString().toLowerCase());
             } else if (spaceElement instanceof Soloon) {
-                bodyValues.add("color", ((Soloon) spaceElement).getColor().toString());
+                bodyValues.add("color", ((Soloon) spaceElement).getColor().toString().toLowerCase());
             }
         }
 

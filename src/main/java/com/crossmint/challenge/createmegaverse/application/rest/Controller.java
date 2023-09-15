@@ -4,11 +4,8 @@ import com.crossmint.challenge.createmegaverse.application.rest.entities.SpaceMa
 import com.crossmint.challenge.createmegaverse.application.rest.entities.Status;
 import com.crossmint.challenge.createmegaverse.application.rest.mapper.SizeAndMarginMapper;
 import com.crossmint.challenge.createmegaverse.application.rest.mapper.SpaceMapMapper;
-import com.crossmint.challenge.createmegaverse.domain.ports.api.CreateCrossmintLogoCommand;
-import com.crossmint.challenge.createmegaverse.domain.ports.api.CreateXCommand;
+import com.crossmint.challenge.createmegaverse.domain.ports.api.*;
 import com.crossmint.challenge.createmegaverse.application.rest.entities.SizeAndMarginRequest;
-import com.crossmint.challenge.createmegaverse.domain.ports.api.DeleteXPolyanetsCommand;
-import com.crossmint.challenge.createmegaverse.domain.ports.api.GetGoalMapQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +22,9 @@ public class Controller {
 
     @Autowired
     private CreateCrossmintLogoCommand createCrossmintLogoCommand;
+
+    @Autowired
+    private DeleteCrossmintLogoCommand deleteCrossmintLogoCommand;
 
     @Autowired
     private GetGoalMapQuery getGoalMapQuery;
@@ -77,6 +77,17 @@ public class Controller {
             createCrossmintLogoCommand.execute();
         } catch (Exception e) {
             return new ResponseEntity<>(new Status(false, "Error happened while creating logo :-("), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(new Status(true, null), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/crossmint-logo")
+    public ResponseEntity deleteCrossmintLogo() {
+        try {
+            deleteCrossmintLogoCommand.execute();
+        } catch (Exception e) {
+            return new ResponseEntity<>(new Status(false, "Error happened while deleting logo :-("), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(new Status(true, null), HttpStatus.OK);
