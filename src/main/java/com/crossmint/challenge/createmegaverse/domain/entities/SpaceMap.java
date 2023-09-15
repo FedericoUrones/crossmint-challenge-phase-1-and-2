@@ -8,5 +8,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 public class SpaceMap {
-    private List<SpaceMapRow> rows;
+    private List<Polyanet> polyanetList;
+    private List<Soloon> soloonList;
+    private List<Cometh> comethList;
 }

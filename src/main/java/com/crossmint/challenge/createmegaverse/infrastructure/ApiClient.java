@@ -4,9 +4,9 @@ import com.crossmint.challenge.createmegaverse.domain.entities.Polyanet;
 import com.crossmint.challenge.createmegaverse.domain.entities.SpaceMap;
 import com.crossmint.challenge.createmegaverse.domain.ports.spi.CreatePolyanetPort;
 import com.crossmint.challenge.createmegaverse.domain.ports.spi.DeletePolyanetsPort;
-import com.crossmint.challenge.createmegaverse.domain.usecase.CreateXPolyanets;
+import com.crossmint.challenge.createmegaverse.domain.ports.spi.GetGoalMapPort;
 import com.crossmint.challenge.createmegaverse.infrastructure.entities.SpaceMapGoalResponse;
-import com.crossmint.challenge.createmegaverse.mapper.SpaceMapMapper;
+import com.crossmint.challenge.createmegaverse.infrastructure.mapper.SpaceMapInfraMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,30 +24,28 @@ import reactor.util.retry.Retry;
 import java.time.Duration;
 
 @Service
-public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort {
+public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort, GetGoalMapPort {
 
     Logger logger = LoggerFactory.getLogger(ApiClient.class);
-    private final SpaceMapMapper spaceMapMapper;
-
-    private final String baseUrl;
+    private final SpaceMapInfraMapper spaceMapInfraMapper;
 
     private final String candidateId;
 
     private final WebClient webClient;
 
     @Autowired
-    public ApiClient(@Value("${service.base.url}") String baseUrl, @Autowired SpaceMapMapper spaceMapMapper,
+    public ApiClient(@Value("${service.base.url}") String baseUrl, @Autowired SpaceMapInfraMapper spaceMapInfraMapper,
                      @Value("${service.candidate.id}") String candidateId) {
-        this.baseUrl = baseUrl;
-        this.spaceMapMapper = spaceMapMapper;
+        this.spaceMapInfraMapper = spaceMapInfraMapper;
         this.candidateId = candidateId;
-        this.webClient  = WebClient.builder().baseUrl(this.baseUrl).build();
+        this.webClient  = WebClient.builder().baseUrl(baseUrl).build();
     }
 
-    public SpaceMap getMap() {
-        SpaceMapGoalResponse spaceMapGoalResponse = webClient.get().uri("/" + candidateId + "/goal").retrieve()
+    @Override
+    public SpaceMap getGoalMap() {
+        SpaceMapGoalResponse spaceMapGoalResponse = webClient.get().uri("/map/" + candidateId + "/goal").retrieve()
                 .bodyToMono(SpaceMapGoalResponse.class).block();
-        return spaceMapMapper.spaceMapGoalResponseToSpaceMap(spaceMapGoalResponse);
+        return spaceMapInfraMapper.spaceMapGoalResponseToSpaceMap(spaceMapGoalResponse);
     }
 
     @Override
