@@ -2,7 +2,8 @@ package com.crossmint.challenge.createmegaverse.infrastructure;
 
 import com.crossmint.challenge.createmegaverse.domain.entities.Polyanet;
 import com.crossmint.challenge.createmegaverse.domain.entities.SpaceMap;
-import com.crossmint.challenge.createmegaverse.domain.ports.spi.CreateXPort;
+import com.crossmint.challenge.createmegaverse.domain.ports.spi.CreatePolyanetPort;
+import com.crossmint.challenge.createmegaverse.domain.ports.spi.DeletePolyanetsPort;
 import com.crossmint.challenge.createmegaverse.infrastructure.entities.SpaceMapGoalResponse;
 import com.crossmint.challenge.createmegaverse.mapper.SpaceMapMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,19 +17,24 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-public class ApiClient implements CreateXPort {
+public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort {
 
+    private final SpaceMapMapper spaceMapMapper;
+
+    private final String baseUrl;
+
+    private final String candidateId;
+
+    private final WebClient webClient;
 
     @Autowired
-    private SpaceMapMapper spaceMapMapper;
-
-    @Value("${service.base.url}")
-    private String baseUrl;
-
-    @Value("${service.candidate.id}")
-    private String candidateId;
-
-    private final WebClient webClient = WebClient.builder().baseUrl(baseUrl).build();
+    public ApiClient(@Value("${service.base.url}") String baseUrl, @Autowired SpaceMapMapper spaceMapMapper,
+                     @Value("${service.candidate.id}") String candidateId) {
+        this.baseUrl = baseUrl;
+        this.spaceMapMapper = spaceMapMapper;
+        this.candidateId = candidateId;
+        this.webClient  = WebClient.builder().baseUrl(this.baseUrl).build();
+    }
 
     public SpaceMap getMap() {
         SpaceMapGoalResponse spaceMapGoalResponse = webClient.get().uri("/" + candidateId + "/goal").retrieve()
@@ -36,22 +42,24 @@ public class ApiClient implements CreateXPort {
         return spaceMapMapper.spaceMapGoalResponseToSpaceMap(spaceMapGoalResponse);
     }
 
+    @Override
     public void createPolyanet(Polyanet polyanet) {
 
         webClient.post().uri("/polyanets")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(getJsonBody(polyanet))
                 .retrieve()
-                .bodyToMono(SpaceMapGoalResponse.class).block();
+                .bodyToMono(Object.class).block();
     }
 
+    @Override
     public void deletePolyanet(Polyanet polyanet) {
 
         webClient.method(HttpMethod.DELETE).uri("/polyanets")
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(getJsonBody(polyanet))
                 .retrieve()
-                .bodyToMono(SpaceMapGoalResponse.class).block();
+                .bodyToMono(Object.class).block();
     }
 
     private BodyInserters.FormInserter<String> getJsonBody(Polyanet polyanet) {
@@ -63,8 +71,4 @@ public class ApiClient implements CreateXPort {
         return BodyInserters.fromFormData(bodyValues);
     }
 
-    @Override
-    public void createX(Polyanet polyanet) {
-
-    }
 }

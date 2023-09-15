@@ -3,7 +3,7 @@ package com.crossmint.challenge.createmegaverse.domain.entities;
 import lombok.Data;
 
 @Data
-public class XCreator {
+public class SizeAndMargin {
     private Integer size;
     private Integer margin;
 }

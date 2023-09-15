@@ -4,6 +4,8 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class Polyanet extends SpaceElement {
-    public Polyanet(int startPolyanet, int startPolyanet1) {
+    public Polyanet(int row, int column) {
+        this.setRow(row);
+        this.setColumn(column);
     }
 }

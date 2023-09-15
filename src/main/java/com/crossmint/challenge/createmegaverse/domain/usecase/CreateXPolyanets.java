@@ -1,9 +1,9 @@
 package com.crossmint.challenge.createmegaverse.domain.usecase;
 
 import com.crossmint.challenge.createmegaverse.domain.entities.Polyanet;
-import com.crossmint.challenge.createmegaverse.domain.entities.XCreator;
+import com.crossmint.challenge.createmegaverse.domain.entities.SizeAndMargin;
 import com.crossmint.challenge.createmegaverse.domain.ports.api.CreateXCommand;
-import com.crossmint.challenge.createmegaverse.domain.ports.spi.CreateXPort;
+import com.crossmint.challenge.createmegaverse.domain.ports.spi.CreatePolyanetPort;
 import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,15 +16,15 @@ import java.util.List;
 
 @Component
 @Data
-public class CreateX implements CreateXCommand {
+public class CreateXPolyanets implements CreateXCommand {
 
-    Logger logger = LoggerFactory.getLogger(CreateX.class);
+    Logger logger = LoggerFactory.getLogger(CreateXPolyanets.class);
 
     private static final String SPACE = "SPACE";
     private static final String POLYANET = "POLYANET";
 
     @Autowired
-    private CreateXPort createXPort;
+    private CreatePolyanetPort createPolyanetPort;
 
     @Value("${size}")
     private Integer defaultSize; // it must be odd and higher than ??
@@ -33,9 +33,9 @@ public class CreateX implements CreateXCommand {
     private Integer defaultMargin; // must be higher or equal to 0
 
     @Override
-    public void execute(XCreator xCreator) {
-        int size = xCreator == null || xCreator.getSize() == null? defaultSize : xCreator.getSize();
-        int margin = xCreator == null || xCreator.getMargin() == null? defaultMargin : xCreator.getMargin();
+    public void execute(SizeAndMargin sizeAndMargin) throws Exception {
+        int size = sizeAndMargin == null || sizeAndMargin.getSize() == null || sizeAndMargin.getSize() == 0? defaultSize : sizeAndMargin.getSize();
+        int margin = sizeAndMargin == null || sizeAndMargin.getMargin() == null || sizeAndMargin.getMargin() == 0? defaultMargin : sizeAndMargin.getMargin();
 
         List<Polyanet> polyanets = new ArrayList<>();
 
@@ -44,14 +44,15 @@ public class CreateX implements CreateXCommand {
             int startPolyanet = i + margin;
             int endPolyanet = size -1 - i - margin;
             polyanets.add(new Polyanet(startPolyanet, startPolyanet));
-            polyanets.add(new Polyanet(endPolyanet, endPolyanet));
+            polyanets.add(new Polyanet(startPolyanet, endPolyanet));
         }
 
         try {
-            polyanets.forEach(polyanet -> createXPort.createX(polyanet));
+            polyanets.forEach(polyanet -> createPolyanetPort.createPolyanet(polyanet));
         } catch (Exception e) {
             logger.error("Error happened while creating polyanets");
             logger.error(e.getLocalizedMessage());
+            throw new Exception("Error happened while creating polyanets");
         }
         logger.info(polyanets.size() + " Polyanets created successfully!");
     }
