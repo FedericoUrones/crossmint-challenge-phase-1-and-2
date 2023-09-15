@@ -1,10 +1,7 @@
 package com.crossmint.challenge.createmegaverse.infrastructure;
 
-import com.crossmint.challenge.createmegaverse.domain.entities.Polyanet;
-import com.crossmint.challenge.createmegaverse.domain.entities.SpaceMap;
-import com.crossmint.challenge.createmegaverse.domain.ports.spi.CreatePolyanetPort;
-import com.crossmint.challenge.createmegaverse.domain.ports.spi.DeletePolyanetsPort;
-import com.crossmint.challenge.createmegaverse.domain.ports.spi.GetGoalMapPort;
+import com.crossmint.challenge.createmegaverse.domain.entities.*;
+import com.crossmint.challenge.createmegaverse.domain.ports.spi.*;
 import com.crossmint.challenge.createmegaverse.infrastructure.entities.SpaceMapGoalResponse;
 import com.crossmint.challenge.createmegaverse.infrastructure.mapper.SpaceMapInfraMapper;
 import org.slf4j.Logger;
@@ -24,7 +21,8 @@ import reactor.util.retry.Retry;
 import java.time.Duration;
 
 @Service
-public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort, GetGoalMapPort {
+public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort, GetGoalMapPort,
+        CreateComethPort, CreateSoloonPort, DeleteComethPort, DeleteSoloonPort {
 
     Logger logger = LoggerFactory.getLogger(ApiClient.class);
     private final SpaceMapInfraMapper spaceMapInfraMapper;
@@ -48,35 +46,63 @@ public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort, GetGo
         return spaceMapInfraMapper.spaceMapGoalResponseToSpaceMap(spaceMapGoalResponse);
     }
 
-    @Override
-    public void createPolyanet(Polyanet polyanet) {
+    private String getPath(SpaceElement spaceElement) {
+        if (spaceElement instanceof Polyanet) {
+            return "/polyanets";
+        } else if (spaceElement instanceof Cometh){
+            return "/comeths";
+        } else {
+            return "/soloons";
+        }
+    }
 
-        webClient.post().uri("/polyanets")
+    public void create(SpaceElement spaceElement) {
+        String currentPath = getPath(spaceElement);
+
+        webClient.post().uri(currentPath)
                 .contentType(MediaType.APPLICATION_JSON)
-                .body(getJsonBody(polyanet))
+                .body(getJsonBody(spaceElement, true))
                 .retrieve()
                 .bodyToMono(Object.class)
                 .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(1))
                         .filter(this::is429TooManyRequestsError)).block();
+    }
+
+    public void delete(SpaceElement spaceElement) {
+        String currentPath = getPath(spaceElement);
+
+        webClient.method(HttpMethod.DELETE).uri(currentPath)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(getJsonBody(spaceElement, false))
+                .retrieve()
+                .bodyToMono(Object.class)
+                .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(1))
+                        .filter(this::is429TooManyRequestsError)).block();
+    }
+
+    @Override
+    public void createPolyanet(Polyanet polyanet) {
+        create(polyanet);
     }
 
     @Override
     public void deletePolyanet(Polyanet polyanet) {
-
-        webClient.method(HttpMethod.DELETE).uri("/polyanets")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(getJsonBody(polyanet))
-                .retrieve()
-                .bodyToMono(Object.class)
-                .retryWhen(Retry.fixedDelay(3, Duration.ofSeconds(1))
-                        .filter(this::is429TooManyRequestsError)).block();
+        delete(polyanet);
     }
 
-    private BodyInserters.FormInserter<String> getJsonBody(Polyanet polyanet) {
+    private BodyInserters.FormInserter<String> getJsonBody(SpaceElement spaceElement, Boolean isCreation) {
         MultiValueMap<String, String> bodyValues = new LinkedMultiValueMap<>();
-        bodyValues.add("row", polyanet.getRow().toString());
-        bodyValues.add("column", polyanet.getColumn().toString());
+        bodyValues.add("row", spaceElement.getRow().toString());
+        bodyValues.add("column", spaceElement.getColumn().toString());
         bodyValues.add("candidateId", candidateId);
+
+        if (isCreation) {
+            if (spaceElement instanceof Cometh) {
+                bodyValues.add("direction", ((Cometh) spaceElement).getDirection().toString());
+            } else if (spaceElement instanceof Soloon) {
+                bodyValues.add("color", ((Soloon) spaceElement).getColor().toString());
+            }
+        }
 
         return BodyInserters.fromFormData(bodyValues);
     }
@@ -87,4 +113,23 @@ public class ApiClient implements CreatePolyanetPort, DeletePolyanetsPort, GetGo
                 ((WebClientResponseException) throwable).getStatusCode().is4xxClientError();
     }
 
+    @Override
+    public void createCometh(Cometh cometh) {
+        create(cometh);
+    }
+
+    @Override
+    public void createSoloon(Soloon soloon) {
+        create(soloon);
+    }
+
+    @Override
+    public void deleteCometh(Cometh cometh) {
+        delete(cometh);
+    }
+
+    @Override
+    public void deleteSoloon(Soloon soloon) {
+        delete(soloon);
+    }
 }

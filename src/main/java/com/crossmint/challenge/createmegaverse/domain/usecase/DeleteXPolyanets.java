@@ -4,7 +4,6 @@ import com.crossmint.challenge.createmegaverse.domain.entities.Polyanet;
 import com.crossmint.challenge.createmegaverse.domain.entities.SizeAndMargin;
 import com.crossmint.challenge.createmegaverse.domain.ports.api.DeleteXPolyanetsCommand;
 import com.crossmint.challenge.createmegaverse.domain.ports.spi.DeletePolyanetsPort;
-import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@Data
 public class DeleteXPolyanets implements DeleteXPolyanetsCommand {
     Logger logger = LoggerFactory.getLogger(DeleteXPolyanets.class);
 

@@ -4,6 +4,7 @@ import com.crossmint.challenge.createmegaverse.application.rest.entities.SpaceMa
 import com.crossmint.challenge.createmegaverse.application.rest.entities.Status;
 import com.crossmint.challenge.createmegaverse.application.rest.mapper.SizeAndMarginMapper;
 import com.crossmint.challenge.createmegaverse.application.rest.mapper.SpaceMapMapper;
+import com.crossmint.challenge.createmegaverse.domain.ports.api.CreateCrossmintLogoCommand;
 import com.crossmint.challenge.createmegaverse.domain.ports.api.CreateXCommand;
 import com.crossmint.challenge.createmegaverse.application.rest.entities.SizeAndMarginRequest;
 import com.crossmint.challenge.createmegaverse.domain.ports.api.DeleteXPolyanetsCommand;
@@ -23,6 +24,9 @@ public class Controller {
     private DeleteXPolyanetsCommand deleteXPolyanetsCommand;
 
     @Autowired
+    private CreateCrossmintLogoCommand createCrossmintLogoCommand;
+
+    @Autowired
     private GetGoalMapQuery getGoalMapQuery;
 
     @Autowired
@@ -37,7 +41,7 @@ public class Controller {
         try {
             createXCommand.execute(sizeAndMarginMapper.requestToDomain(sizeAndMarginRequest));
         } catch (Exception e) {
-            return new ResponseEntity<Status>(new Status(false, "Error happened"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<Status>(new Status(false, "Error happened while creating Polyanets X :-("), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<Status>(new Status(true, null), HttpStatus.OK);
@@ -49,10 +53,10 @@ public class Controller {
         try {
             deleteXPolyanetsCommand.execute(sizeAndMarginMapper.requestToDomain(sizeAndMarginRequest));
         } catch (Exception e) {
-            return new ResponseEntity<Status>(new Status(false, "Error happened"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new Status(false, "Error happened while deleting Polyanets X :-("), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<Status>(new Status(true, null), HttpStatus.OK);
+        return new ResponseEntity<>(new Status(true, null), HttpStatus.OK);
     }
 
     @GetMapping("/goal")
@@ -61,9 +65,20 @@ public class Controller {
         try {
             spaceMapResult = spaceMapMapper.domainToResponse(getGoalMapQuery.execute());
         } catch (Exception e) {
-            return new ResponseEntity<>(new Status(false, "Error happened"), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new Status(false, "Error happened while getting goals map :-("), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(spaceMapResult, HttpStatus.OK);
+    }
+
+    @PostMapping("/crossmint-logo")
+    public ResponseEntity createCrossmintLogo() {
+        try {
+            createCrossmintLogoCommand.execute();
+        } catch (Exception e) {
+            return new ResponseEntity<>(new Status(false, "Error happened while creating logo :-("), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(new Status(true, null), HttpStatus.OK);
     }
 }

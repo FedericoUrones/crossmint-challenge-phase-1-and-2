@@ -4,7 +4,6 @@ import com.crossmint.challenge.createmegaverse.domain.entities.Polyanet;
 import com.crossmint.challenge.createmegaverse.domain.entities.SizeAndMargin;
 import com.crossmint.challenge.createmegaverse.domain.ports.api.CreateXCommand;
 import com.crossmint.challenge.createmegaverse.domain.ports.spi.CreatePolyanetPort;
-import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,22 +14,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-@Data
 public class CreateXPolyanets implements CreateXCommand {
 
     Logger logger = LoggerFactory.getLogger(CreateXPolyanets.class);
 
-    private static final String SPACE = "SPACE";
-    private static final String POLYANET = "POLYANET";
+    // private static final String SPACE = "SPACE";
+    // private static final String POLYANET = "POLYANET";
 
     @Autowired
     private CreatePolyanetPort createPolyanetPort;
 
     @Value("${size}")
-    private Integer defaultSize; // it must be odd and higher than ??
+    private Integer defaultSize;
 
     @Value("${margin}")
-    private Integer defaultMargin; // must be higher or equal to 0
+    private Integer defaultMargin;
 
     @Override
     public void execute(SizeAndMargin sizeAndMargin) throws Exception {
